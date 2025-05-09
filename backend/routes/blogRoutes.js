@@ -35,9 +35,26 @@ router.post('/create', checkAuth, (request, response) => {
 });
 
 router.get('/all', (request, response) => {
-  database.all(`SELECT * FROM blog_posts`, (error, allPosts) => {
+  const { sortBy } = request.query;
+  let queryString = `SELECT * FROM blog_posts`;
+  
+  if (sortBy === 'newest') {
+    queryString += ` ORDER BY created_at DESC`;
+  } else if (sortBy === 'most-liked') {
+    queryString = `
+      SELECT bp.*, COUNT(l.post_id) as like_count 
+      FROM blog_posts bp 
+      LEFT JOIN likes l ON bp.id = l.post_id AND l.is_like = true 
+      GROUP BY bp.id 
+      ORDER BY like_count DESC, created_at DESC
+    `;
+  } else if (sortBy) {
+    return response.status(400).json({ error: 'Invalid sort option. Use "newest" or "most-liked".' });
+  }
+
+  database.all(queryString, (error, allPosts) => {
     if (error) {
-      return response.status(500).json({ error: 'Unable to fetch posts' });
+      return response.status(500).json({ error: 'Unable to fetch posts', details: error.message });
     }
     response.json(allPosts);
   });
@@ -95,6 +112,69 @@ router.get('/search', (request, response) => {
     }
     response.json(foundPosts);
   });
+});
+
+// function to handle reactions
+const handleReaction = (request, response, isLike) => {
+  const targetPostId = request.params.postId;
+  const currentUserId = request.loggedInUser.userId;
+
+  database.get(
+    `SELECT * FROM likes WHERE user_id = ? AND post_id = ?`,
+    [currentUserId, targetPostId],
+    (error, existingReaction) => {
+      if (error) {
+        return response.status(500).json({ error: 'Unable to check existing reaction' });
+      }
+      if (existingReaction) {
+        return response.status(400).json({ error: 'You have already reacted to this post' });
+      }
+
+      database.run(
+        `INSERT INTO likes (user_id, post_id, is_like) VALUES (?, ?, ?)`,
+        [currentUserId, targetPostId, isLike],
+        (error) => {
+          if (error) {
+            return response.status(500).json({ error: `Unable to ${isLike ? 'like' : 'dislike'} post` });
+          }
+          response.json({ message: `Post ${isLike ? 'liked' : 'disliked'}` });
+        }
+      );
+    }
+  );
+};
+
+router.post('/:postId/like', checkAuth, (request, response) => {
+  handleReaction(request, response, true);
+});
+
+router.post('/:postId/dislike', checkAuth, (request, response) => {
+  handleReaction(request, response, false);
+});
+
+router.get('/:postId/reactions', (request, response) => {
+  const targetPostId = request.params.postId;
+  database.all(
+    `SELECT is_like, COUNT(*) as reaction_count 
+     FROM likes 
+     WHERE post_id = ? 
+     GROUP BY is_like`,
+    [targetPostId],
+    (error, reactionCounts) => {
+      if (error) {
+        return response.status(500).json({ error: 'Unable to fetch reactions' });
+      }
+      const totals = { totalLikes: 0, totalDislikes: 0 };
+      reactionCounts.forEach(row => {
+        if (row.is_like) {
+          totals.totalLikes = row.reaction_count;
+        } else {
+          totals.totalDislikes = row.reaction_count;
+        }
+      });
+      response.json(totals);
+    }
+  );
 });
 
 module.exports = router;
