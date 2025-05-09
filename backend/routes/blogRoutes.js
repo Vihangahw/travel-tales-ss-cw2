@@ -72,4 +72,29 @@ router.delete('/:postId', checkAuth, (request, response) => {
   );
 });
 
+router.get('/search', (request, response) => {
+  const { searchCountry, searchUser, pageNum = 1, itemsPerPage = 10 } = request.query;
+  const offsetVal = (pageNum - 1) * itemsPerPage;
+  let queryString = `SELECT bp.*, u.username FROM blog_posts bp JOIN users u ON bp.user_id = u.id WHERE 1=1`;
+  const queryParams = [];
+
+  if (searchCountry) {
+    queryString += ` AND bp.country_name = ?`;
+    queryParams.push(searchCountry);
+  }
+  if (searchUser) {
+    queryString += ` AND u.username = ?`;
+    queryParams.push(searchUser);
+  }
+  queryString += ` LIMIT ? OFFSET ?`;
+  queryParams.push(parseInt(itemsPerPage), parseInt(offsetVal));
+
+  database.all(queryString, queryParams, (error, foundPosts) => {
+    if (error) {
+      return response.status(500).json({ error: 'Unable to search posts' });
+    }
+    response.json(foundPosts);
+  });
+});
+
 module.exports = router;
