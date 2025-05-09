@@ -7,6 +7,6 @@ app.get('/', (req, res) => {
   res.send('TravelTales Backend Running');
 });
 
-app.listen(3000, () => {
-  console.log('Server running on http://localhost:3000');
+app.listen(4000, () => {
+  console.log('Server running on http://localhost:4000');
 });
