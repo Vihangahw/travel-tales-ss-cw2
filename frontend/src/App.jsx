@@ -2,14 +2,14 @@ import { useState } from 'react'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-   <div>
+    <div>
       <h1>TravelTales</h1>
-      <p>Frontend Checking</p>
+      <nav>
+        <a href="/">Home</a> | <a href="/search">Search</a> | <a href="/login">Login</a> | <a href="/register">Register</a> | <a href="/profile">Profile</a>
+      </nav>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
