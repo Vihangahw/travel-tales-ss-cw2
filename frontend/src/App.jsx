@@ -5,13 +5,14 @@ function App() {
   const [postList, setPostList] = useState([]);
   const [searchCountry, setSearchCountry] = useState('');
   const [searchUser, setSearchUser] = useState('');
+  const [sortOption, setSortOption] = useState('newest');
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [sortOption]);
 
   const fetchPosts = (country = '', user = '') => {
-    let url = 'http://localhost:4000/blogs/all';
+    let url = `http://localhost:4000/blogs/all?sortBy=${sortOption}`;
     if (country || user) {
       url = `http://localhost:4000/blogs/search?searchCountry=${country}&searchUser=${user}`;
     }
@@ -44,6 +45,13 @@ function App() {
           onChange={(event) => setSearchUser(event.target.value)}
         />
         <button onClick={handleSearch}>Search</button>
+      </div>
+      <div>
+        <label>Sort by: </label>
+        <select value={sortOption} onChange={(event) => setSortOption(event.target.value)}>
+          <option value="newest">Newest</option>
+          <option value="most-liked">Most Liked</option>
+        </select>
       </div>
       <h2>Recent Posts</h2>
       {postList.map(post => (
