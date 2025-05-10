@@ -66,9 +66,12 @@ router.put('/:postId', checkAuth, (request, response) => {
   database.run(
     `UPDATE blog_posts SET title = ?, content = ?, country_name = ?, visit_date = ? WHERE id = ? AND user_id = ?`,
     [postTitle, postContent, countryVisited, visitDate, postId, request.loggedInUser.userId],
-    (error) => {
+    function (error) {
       if (error) {
         return response.status(500).json({ error: 'Unable to update post' });
+      }
+      if (this.changes === 0) {
+        return response.status(403).json({ error: 'Not authorized to update this post or post not found' });
       }
       response.json({ message: 'Post updated successfully' });
     }
@@ -80,9 +83,12 @@ router.delete('/:postId', checkAuth, (request, response) => {
   database.run(
     `DELETE FROM blog_posts WHERE id = ? AND user_id = ?`,
     [postId, request.loggedInUser.userId],
-    (error) => {
+    function (error) {
       if (error) {
         return response.status(500).json({ error: 'Unable to delete post' });
+      }
+      if (this.changes === 0) {
+        return response.status(403).json({ error: 'Not authorized to delete this post or post not found' });
       }
       response.json({ message: 'Post deleted successfully' });
     }
@@ -119,25 +125,40 @@ const handleReaction = (request, response, isLike) => {
   const targetPostId = request.params.postId;
   const currentUserId = request.loggedInUser.userId;
 
+  // Check if the post exists
   database.get(
-    `SELECT * FROM likes WHERE user_id = ? AND post_id = ?`,
-    [currentUserId, targetPostId],
-    (error, existingReaction) => {
+    `SELECT * FROM blog_posts WHERE id = ?`,
+    [targetPostId],
+    (error, post) => {
       if (error) {
-        return response.status(500).json({ error: 'Unable to check existing reaction' });
+        return response.status(500).json({ error: 'Unable to verify post existence' });
       }
-      if (existingReaction) {
-        return response.status(400).json({ error: 'You have already reacted to this post' });
+      if (!post) {
+        return response.status(404).json({ error: 'Post not found' });
       }
 
-      database.run(
-        `INSERT INTO likes (user_id, post_id, is_like) VALUES (?, ?, ?)`,
-        [currentUserId, targetPostId, isLike],
-        (error) => {
+      // Check for existing reaction
+      database.get(
+        `SELECT * FROM likes WHERE user_id = ? AND post_id = ?`,
+        [currentUserId, targetPostId],
+        (error, existingReaction) => {
           if (error) {
-            return response.status(500).json({ error: `Unable to ${isLike ? 'like' : 'dislike'} post` });
+            return response.status(500).json({ error: 'Unable to check existing reaction' });
           }
-          response.json({ message: `Post ${isLike ? 'liked' : 'disliked'}` });
+          if (existingReaction) {
+            return response.status(400).json({ error: 'You have already reacted to this post' });
+          }
+
+          database.run(
+            `INSERT INTO likes (user_id, post_id, is_like) VALUES (?, ?, ?)`,
+            [currentUserId, targetPostId, isLike],
+            (error) => {
+              if (error) {
+                return response.status(500).json({ error: `Unable to ${isLike ? 'like' : 'dislike'} post` });
+              }
+              response.json({ message: `Post ${isLike ? 'liked' : 'disliked'}` });
+            }
+          );
         }
       );
     }
