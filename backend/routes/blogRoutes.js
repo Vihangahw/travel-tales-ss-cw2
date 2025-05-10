@@ -22,6 +22,9 @@ const checkAuth = (request, response, next) => {
 
 router.post('/create', checkAuth, (request, response) => {
   const { postTitle, postContent, countryVisited, visitDate } = request.body;
+  if (!postTitle || !postContent || !countryVisited || !visitDate) {
+    return response.status(400).json({ error: 'All fields (postTitle, postContent, countryVisited, visitDate) are required' });
+  }
   database.run(
     `INSERT INTO blog_posts (user_id, title, content, country_name, visit_date) VALUES (?, ?, ?, ?, ?)`,
     [request.loggedInUser.userId, postTitle, postContent, countryVisited, visitDate],
@@ -63,6 +66,9 @@ router.get('/all', (request, response) => {
 router.put('/:postId', checkAuth, (request, response) => {
   const { postId } = request.params;
   const { postTitle, postContent, countryVisited, visitDate } = request.body;
+  if (!postTitle || !postContent || !countryVisited || !visitDate) {
+    return response.status(400).json({ error: 'All fields (postTitle, postContent, countryVisited, visitDate) are required' });
+  }
   database.run(
     `UPDATE blog_posts SET title = ?, content = ?, country_name = ?, visit_date = ? WHERE id = ? AND user_id = ?`,
     [postTitle, postContent, countryVisited, visitDate, postId, request.loggedInUser.userId],
