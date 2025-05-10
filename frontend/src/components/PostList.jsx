@@ -1,6 +1,6 @@
 import PostInteraction from './PostInteraction';
 
-function PostList({ posts, loggedInUserId, onEdit, onDelete, reactions, onLike, onDislike, onFollow }) {
+function PostList({ posts, loggedInUserId, onEdit, onDelete, reactions, onLike, onDislike, onFollow, followedUsers }) {
   return (
     <div>
       <h2>Recent Posts</h2>
@@ -15,7 +15,9 @@ function PostList({ posts, loggedInUserId, onEdit, onDelete, reactions, onLike, 
             reactions={reactions}
             onLike={onLike}
             onDislike={onDislike}
-            onFollow={() => onFollow(post.user_id)}
+            onFollow={onFollow}
+            isFollowing={followedUsers.has(post.user_id)} 
+            showFollow={post.user_id !== loggedInUserId} 
           />
           {post.user_id === loggedInUserId && (
             <>
