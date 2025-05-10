@@ -5,6 +5,7 @@ import AuthForm from './components/AuthForm';
 import SearchBar from './components/SearchBar';
 import SortSelector from './components/SortSelector';
 import PostList from './components/PostList';
+import NewPost from './components/NewPost';
 
 function App() {
   const [postList, setPostList] = useState([]);
@@ -17,6 +18,7 @@ function App() {
   const [displayName, setDisplayName] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [loggedInUserId, setLoggedInUserId] = useState(null);
+  const [newPost, setNewPost] = useState({ postTitle: '', postContent: '', countryVisited: '', visitDate: '' });
 
   useEffect(() => {
     if (currentToken) {
@@ -73,6 +75,22 @@ function App() {
     alert('Logged out successfully');
   };
 
+  const handleCreatePost = () => {
+    if (!currentToken) {
+      alert('Please log in to create a post');
+      return;
+    }
+    axios.post('http://localhost:4000/blogs/create', newPost, {
+      headers: { Authorization: `Bearer ${currentToken}` }
+    })
+      .then(() => {
+        alert('Post created successfully');
+        setNewPost({ postTitle: '', postContent: '', countryVisited: '', visitDate: '' });
+        fetchPosts();
+      })
+      .catch(error => alert(error.response?.data?.error || 'Failed to create post'));
+  };
+
   return (
     <div>
       <h1>TravelTales</h1>
@@ -98,6 +116,11 @@ function App() {
 
       {currentToken && (
         <>
+          <NewPost
+            newPost={newPost}
+            onPostChange={setNewPost}
+            onSubmit={handleCreatePost}
+          />
           <SearchBar
             searchCountry={searchCountry}
             searchUser={searchUser}
