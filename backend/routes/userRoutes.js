@@ -22,28 +22,98 @@ const checkAuth = (request, response, next) => {
 
 router.post('/follow/:targetId', checkAuth, (request, response) => {
   const targetUserId = request.params.targetId;
-  database.run(
-    `INSERT INTO follows (follower_id, followed_id) VALUES (?, ?)`,
-    [request.loggedInUser.userId, targetUserId],
-    (error) => {
+  const currentUserId = request.loggedInUser.userId;
+
+  // Prevent self following for users
+  if (parseInt(targetUserId) === currentUserId) {
+    return response.status(400).json({ error: 'Cannot follow yourself' });
+  }
+
+  // Check if target user exists
+  database.get(
+    `SELECT * FROM users WHERE id = ?`,
+    [targetUserId],
+    (error, targetUser) => {
       if (error) {
-        return response.status(500).json({ error: 'Unable to follow user' });
+        return response.status(500).json({ error: 'Unable to verify user' });
       }
-      response.json({ message: 'User followed' });
+      if (!targetUser) {
+        return response.status(404).json({ error: 'User not found' });
+      }
+
+      // Check for existing follow
+      database.get(
+        `SELECT * FROM follows WHERE follower_id = ? AND followed_id = ?`,
+        [currentUserId, targetUserId],
+        (error, existingFollow) => {
+          if (error) {
+            return response.status(500).json({ error: 'Unable to check existing follow' });
+          }
+          if (existingFollow) {
+            return response.status(400).json({ error: 'You are already following this user' });
+          }
+
+          database.run(
+            `INSERT INTO follows (follower_id, followed_id) VALUES (?, ?)`,
+            [currentUserId, targetUserId],
+            (error) => {
+              if (error) {
+                return response.status(500).json({ error: 'Unable to follow user' });
+              }
+              response.json({ message: 'User followed' });
+            }
+          );
+        }
+      );
     }
   );
 });
 
 router.post('/unfollow/:targetId', checkAuth, (request, response) => {
   const targetUserId = request.params.targetId;
-  database.run(
-    `DELETE FROM follows WHERE follower_id = ? AND followed_id = ?`,
-    [request.loggedInUser.userId, targetUserId],
-    (error) => {
+  const currentUserId = request.loggedInUser.userId;
+
+  // Prevent self unfollowing
+  if (parseInt(targetUserId) === currentUserId) {
+    return response.status(400).json({ error: 'Cannot unfollow yourself' });
+  }
+
+  // Check if target user exists
+  database.get(
+    `SELECT * FROM users WHERE id = ?`,
+    [targetUserId],
+    (error, targetUser) => {
       if (error) {
-        return response.status(500).json({ error: 'Unable to unfollow user' });
+        return response.status(500).json({ error: 'Unable to verify user' });
       }
-      response.json({ message: 'User unfollowed' });
+      if (!targetUser) {
+        return response.status(404).json({ error: 'User not found' });
+      }
+
+      // Check the follow relationship is exists
+      database.get(
+        `SELECT * FROM follows WHERE follower_id = ? AND followed_id = ?`,
+        [currentUserId, targetUserId],
+        (error, existingFollow) => {
+          if (error) {
+            return response.status(500).json({ error: 'Unable to check follow relationship' });
+          }
+          if (!existingFollow) {
+            return response.status(400).json({ error: 'You are not following this user' });
+          }
+
+          database.run(
+            `DELETE FROM follows WHERE follower_id = ? AND followed_id = ?`,
+            [currentUserId, targetUserId],
+            function (error) {
+              if (error) {
+                return response.status(500).json({ error: 'Unable to unfollow user' });
+              }
+              response.json({ message: 'User unfollowed' });
+            }
+          );
+        }
+      );
     }
   );
 });
