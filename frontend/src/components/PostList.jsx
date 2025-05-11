@@ -1,6 +1,7 @@
 import PostInteraction from './PostInteraction';
+import { useEffect } from 'react';
 
-function PostList({ posts, loggedInUserId, onEdit, onDelete, reactions, onLike, onDislike, onFollow, followedUsers }) {
+function PostList({ posts, loggedInUserId, onEdit, onDelete, reactions, onLike, onDislike, onFollow, followedUsers, likedPosts, dislikedPosts }) {
   return (
     <div>
       <h2>Recent Posts</h2>
@@ -12,13 +13,15 @@ function PostList({ posts, loggedInUserId, onEdit, onDelete, reactions, onLike, 
           <p>Visit Date: {post.visit_date}</p>
           <PostInteraction
             postId={post.id}
-            userId={post.user_id} 
+            userId={post.user_id}
             reactions={reactions}
             onLike={onLike}
             onDislike={onDislike}
             onFollow={onFollow}
             isFollowing={followedUsers.has(post.user_id)} 
             showFollow={post.user_id !== loggedInUserId} 
+            isLiked={likedPosts.has(post.id)} 
+            isDisliked={dislikedPosts.has(post.id)} 
           />
           {post.user_id === loggedInUserId && (
             <>
