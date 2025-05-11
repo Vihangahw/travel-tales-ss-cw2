@@ -143,7 +143,6 @@ const handleReaction = (request, response, isLike) => {
     [targetPostId],
     (error, post) => {
       if (error) {
-        console.error('Error verifying post:', error);
         return response.status(500).json({ error: 'Unable to verify post' });
       }
       if (!post) {
@@ -156,11 +155,8 @@ const handleReaction = (request, response, isLike) => {
         [currentUserId, targetPostId],
         (error, existingReaction) => {
           if (error) {
-            console.error('Error checking existing reaction:', error);
             return response.status(500).json({ error: 'Unable to check current reaction' });
           }
-          console.log('Existing reaction:', existingReaction);
-          console.log('isLike:', isLike, 'existingReaction.is_like:', existingReaction ? existingReaction.is_like : null);
 
           if (existingReaction) {
             // Convert database value as 0 or 1 for comparison
@@ -171,10 +167,8 @@ const handleReaction = (request, response, isLike) => {
                 [currentUserId, targetPostId],
                 (error) => {
                   if (error) {
-                    console.error('Error removing reaction:', error);
                     return response.status(500).json({ error: 'Unable to remove reaction' });
                   }
-                  console.log('Reaction removed for post:', targetPostId);
                   response.json({ message: `Reaction ${isLike ? 'like' : 'dislike'} removed` });
                 }
               );
@@ -187,7 +181,6 @@ const handleReaction = (request, response, isLike) => {
                     console.error('Error updating reaction:', error);
                     return response.status(500).json({ error: 'Unable to update reaction' });
                   }
-                  console.log('Reaction updated for post:', targetPostId);
                   response.json({ message: `Post ${isLike ? 'liked' : 'disliked'}` });
                 }
               );
@@ -201,7 +194,6 @@ const handleReaction = (request, response, isLike) => {
                   console.error('Error adding reaction:', error);
                   return response.status(500).json({ error: `Unable to ${isLike ? 'like' : 'dislike'} post` });
                 }
-                console.log('Reaction added for post:', targetPostId);
                 response.json({ message: `Post ${isLike ? 'liked' : 'disliked'}` });
               }
             );
