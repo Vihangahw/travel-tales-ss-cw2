@@ -1,4 +1,4 @@
-function PostInteraction({ postId, reactions, onLike, onDislike, onFollow, isFollowing, showFollow }) {
+function PostInteraction({ postId, userId, reactions, onLike, onDislike, onFollow, isFollowing, showFollow }) {
   return (
     <div>
       <p>
@@ -8,7 +8,7 @@ function PostInteraction({ postId, reactions, onLike, onDislike, onFollow, isFol
       <button onClick={() => onLike(postId)}>Like</button>
       <button onClick={() => onDislike(postId)}>Dislike</button>
       {showFollow && (
-        <button onClick={onFollow}>
+        <button onClick={() => onFollow(userId)}> 
           {isFollowing ? 'Following' : 'Follow'}
         </button>
       )}

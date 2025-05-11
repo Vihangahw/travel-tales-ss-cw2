@@ -12,6 +12,7 @@ function PostList({ posts, loggedInUserId, onEdit, onDelete, reactions, onLike, 
           <p>Visit Date: {post.visit_date}</p>
           <PostInteraction
             postId={post.id}
+            userId={post.user_id} 
             reactions={reactions}
             onLike={onLike}
             onDislike={onDislike}
