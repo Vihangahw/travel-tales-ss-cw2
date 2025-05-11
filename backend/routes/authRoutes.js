@@ -32,7 +32,7 @@ router.post('/login', (request, response) => {
       if (!userRecord || !(await bcrypt.compare(userPassword, userRecord.password))) {
         return response.status(401).json({ error: 'Invalid credentials' });
       }
-      const authToken = jwt.sign({ userId: userRecord.id }, jwtSecret, { expiresIn: '1h' });
+      const authToken = jwt.sign({ userId: userRecord.id }, jwtSecret, { expiresIn: '24h' }); 
       response.json({ authToken });
     }
   );
