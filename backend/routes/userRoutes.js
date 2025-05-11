@@ -21,11 +21,11 @@ const checkAuth = (request, response, next) => {
 };
 
 router.post('/follow/:targetId', checkAuth, (request, response) => {
-  const targetUserId = parseInt(request.params.targetId); 
+  const targetUserId = request.params.targetId;
   const currentUserId = request.loggedInUser.userId;
 
   // Prevent self following for users
-  if (targetUserId === currentUserId) {
+  if (parseInt(targetUserId) === currentUserId) {
     return response.status(400).json({ error: 'Cannot follow yourself' });
   }
 
@@ -61,52 +61,6 @@ router.post('/follow/:targetId', checkAuth, (request, response) => {
                 return response.status(500).json({ error: 'Unable to follow user' });
               }
               response.json({ message: 'User followed' });
-            }
-          );
-        }
-      );
-    }
-  );
-});
-
-router.delete('/unfollow/:targetId', checkAuth, (request, response) => {
-  const targetUserId = parseInt(request.params.targetId); 
-  const currentUserId = request.loggedInUser.userId;
-
-  if (targetUserId === currentUserId) {
-    return response.status(400).json({ error: 'Cannot unfollow yourself' });
-  }
-
-  database.get(
-    `SELECT * FROM users WHERE id = ?`,
-    [targetUserId],
-    (error, targetUser) => {
-      if (error) {
-        return response.status(500).json({ error: 'Unable to verify user' });
-      }
-      if (!targetUser) {
-        return response.status(404).json({ error: 'User not found' });
-      }
-
-      database.get(
-        `SELECT * FROM follows WHERE follower_id = ? AND followed_id = ?`,
-        [currentUserId, targetUserId],
-        (error, existingFollow) => {
-          if (error) {
-            return response.status(500).json({ error: 'Database error' });
-          }
-          if (!existingFollow) {
-            return response.status(400).json({ error: 'You are not following this user' });
-          }
-
-          database.run(
-            `DELETE FROM follows WHERE follower_id = ? AND followed_id = ?`,
-            [currentUserId, targetUserId],
-            (error) => {
-              if (error) {
-                return response.status(500).json({ error: 'Unable to unfollow user' });
-              }
-              response.json({ message: 'User unfollowed' });
             }
           );
         }
@@ -155,15 +109,48 @@ router.get('/following', checkAuth, (request, response) => {
   const userId = request.loggedInUser.userId;
 
   const query = `
-    SELECT followed_user_id 
+    SELECT followed_id 
     FROM follows 
-    WHERE follower_user_id = ?
+    WHERE follower_id = ?
   `;
   database.all(query, [userId], (error, rows) => {
     if (error) {
       return response.status(500).json({ error: 'Unable to fetch followed users', details: error.message });
     }
-    response.json(rows);
+    response.json(rows.map(row => ({ followed_user_id: row.followed_id })));
+  });
+});
+
+router.delete('/unfollow/:targetId', checkAuth, (request, response) => {
+  const followerId = request.loggedInUser.userId;
+  const targetId = parseInt(request.params.targetId);
+
+  if (followerId === targetId) {
+    return response.status(400).json({ error: 'You cannot unfollow yourself' });
+  }
+
+  const checkFollowQuery = `
+    SELECT * FROM follows 
+    WHERE follower_id = ? AND followed_id = ?
+  `;
+  database.get(checkFollowQuery, [followerId, targetId], (error, row) => {
+    if (error) {
+      return response.status(500).json({ error: 'Database error', details: error.message });
+    }
+    if (!row) {
+      return response.status(400).json({ error: 'You are not following this user' });
+    }
+
+    const deleteQuery = `
+      DELETE FROM follows 
+      WHERE follower_id = ? AND followed_id = ?
+    `;
+    database.run(deleteQuery, [followerId, targetId], error => {
+      if (error) {
+        return response.status(500).json({ error: 'Unable to unfollow user', details: error.message });
+      }
+      response.json({ message: 'User unfollowed successfully' });
+    });
   });
 });
 
