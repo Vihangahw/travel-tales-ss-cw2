@@ -22,14 +22,17 @@ function App() {
   const [newPost, setNewPost] = useState({ postTitle: '', postContent: '', countryVisited: '', visitDate: '' });
   const [editingPost, setEditingPost] = useState(null);
   const [reactions, setReactions] = useState({});
-  const [followedUsers, setFollowedUsers] = useState(new Set()); // New state to track followed users
+  const [followedUsers, setFollowedUsers] = useState(new Set());
+  const [likedPosts, setLikedPosts] = useState(new Set()); 
+  const [dislikedPosts, setDislikedPosts] = useState(new Set()); 
 
   useEffect(() => {
     if (currentToken) {
       const decodedToken = JSON.parse(atob(currentToken.split('.')[1]));
       setLoggedInUserId(decodedToken.userId);
       fetchPosts();
-      fetchFollowedUsers(); // Fetch followed users on login
+      fetchFollowedUsers();
+      fetchUserReactions();
     }
   }, [sortOption, currentToken]);
 
@@ -41,7 +44,9 @@ function App() {
     axios.get(url)
       .then(response => {
         setPostList(response.data);
-        response.data.forEach(post => fetchReactions(post.id));
+        response.data.forEach(post => {
+          fetchReactions(post.id);
+        });
       })
       .catch(error => console.error('Error fetching posts:', error));
   };
@@ -65,6 +70,23 @@ function App() {
       .catch(error => console.error('Error fetching followed users:', error));
   };
 
+  const fetchUserReactions = () => {
+    if (!currentToken) return;
+    postList.forEach(post => {
+      axios.get(`http://localhost:4000/blogs/${post.id}/user-reaction`, {
+        headers: { Authorization: `Bearer ${currentToken}` }
+      })
+        .then(response => {
+          if (response.data.reaction === 'like') {
+            setLikedPosts(prev => new Set(prev).add(post.id));
+          } else if (response.data.reaction === 'dislike') {
+            setDislikedPosts(prev => new Set(prev).add(post.id));
+          }
+        })
+        .catch(error => console.error('Error fetching user reaction:', error));
+    });
+  };
+
   const handleSearch = () => {
     fetchPosts(searchCountry, searchUser);
   };
@@ -84,7 +106,6 @@ function App() {
           const decodedToken = JSON.parse(atob(token.split('.')[1]));
           setLoggedInUserId(decodedToken.userId);
         }
-        alert(isRegistering ? 'Registration successful' : 'Login successful');
         setUserEmail('');
         setUserPassword('');
         setDisplayName('');
@@ -99,8 +120,9 @@ function App() {
     localStorage.removeItem('token');
     setCurrentToken('');
     setLoggedInUserId(null);
-    setFollowedUsers(new Set()); // Clear followed users on logout
-    alert('Logged out successfully');
+    setFollowedUsers(new Set());
+    setLikedPosts(new Set()); 
+    setDislikedPosts(new Set());
   };
 
   const handleCreatePost = () => {
@@ -134,7 +156,6 @@ function App() {
       headers: { Authorization: `Bearer ${currentToken}` }
     })
       .then(() => {
-        alert('Post updated successfully');
         setEditingPost(null);
         setNewPost({ postTitle: '', postContent: '', countryVisited: '', visitDate: '' });
         fetchPosts();
@@ -147,7 +168,6 @@ function App() {
       headers: { Authorization: `Bearer ${currentToken}` }
     })
       .then(() => {
-        alert('Post deleted successfully');
         fetchPosts();
       })
       .catch(error => alert(error.response?.data?.error || 'Failed to delete post'));
@@ -157,9 +177,22 @@ function App() {
     axios.post(`http://localhost:4000/blogs/${postId}/like`, {}, {
       headers: { Authorization: `Bearer ${currentToken}` }
     })
-      .then(() => {
+      .then(response => {
         fetchReactions(postId);
-        fetchPosts();
+        if (response.data.message.includes('liked')) {
+          setLikedPosts(prev => new Set(prev).add(postId));
+          setDislikedPosts(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(postId);
+            return newSet;
+          });
+        } else if (response.data.message.includes('removed')) {
+          setLikedPosts(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(postId);
+            return newSet;
+          });
+        }
       })
       .catch(error => alert(error.response?.data?.error || 'Failed to like post'));
   };
@@ -168,9 +201,22 @@ function App() {
     axios.post(`http://localhost:4000/blogs/${postId}/dislike`, {}, {
       headers: { Authorization: `Bearer ${currentToken}` }
     })
-      .then(() => {
+      .then(response => {
         fetchReactions(postId);
-        fetchPosts();
+        if (response.data.message.includes('disliked')) {
+          setDislikedPosts(prev => new Set(prev).add(postId));
+          setLikedPosts(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(postId);
+            return newSet;
+          });
+        } else if (response.data.message.includes('removed')) {
+          setDislikedPosts(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(postId);
+            return newSet;
+          });
+        }
       })
       .catch(error => alert(error.response?.data?.error || 'Failed to dislike post'));
   };
@@ -195,14 +241,12 @@ function App() {
           const newFollowedUsers = new Set(prev);
           if (isFollowing) {
             newFollowedUsers.delete(targetId);
-            alert('User unfollowed');
           } else {
             newFollowedUsers.add(targetId);
-            alert('User followed');
           }
           return newFollowedUsers;
         });
-        fetchPosts(); // Refresh posts to ensure consistency
+        fetchPosts();
       })
       .catch(error => alert(error.response?.data?.error || `Failed to ${isFollowing ? 'unfollow' : 'follow'} user`));
   };
@@ -267,6 +311,8 @@ function App() {
             onDislike={handleDislike}
             onFollow={handleFollowToggle}
             followedUsers={followedUsers}
+            likedPosts={likedPosts} 
+            dislikedPosts={dislikedPosts} 
           />
         </>
       )}
