@@ -128,8 +128,14 @@ router.get('/search', (request, response) => {
 
 // function to handle reactions
 const handleReaction = (request, response, isLike) => {
-  const targetPostId = request.params.postId;
+  const targetPostId = parseInt(request.params.postId);
   const currentUserId = request.loggedInUser.userId;
+
+
+  if (isNaN(targetPostId)) {
+    console.error('Invalid post ID:', request.params.postId);
+    return response.status(400).json({ error: 'Invalid post ID' });
+  }
 
   // Check if the post exists
   database.get(
@@ -137,7 +143,7 @@ const handleReaction = (request, response, isLike) => {
     [targetPostId],
     (error, post) => {
       if (error) {
-        return response.status(500).json({ error: 'Unable to verify post existence' });
+        return response.status(500).json({ error: 'Unable to verify post' });
       }
       if (!post) {
         return response.status(404).json({ error: 'Post not found' });
@@ -149,22 +155,49 @@ const handleReaction = (request, response, isLike) => {
         [currentUserId, targetPostId],
         (error, existingReaction) => {
           if (error) {
-            return response.status(500).json({ error: 'Unable to check existing reaction' });
-          }
-          if (existingReaction) {
-            return response.status(400).json({ error: 'You have already reacted to this post' });
+            return response.status(500).json({ error: 'Unable to check current reaction' });
           }
 
-          database.run(
-            `INSERT INTO likes (user_id, post_id, is_like) VALUES (?, ?, ?)`,
-            [currentUserId, targetPostId, isLike],
-            (error) => {
-              if (error) {
-                return response.status(500).json({ error: `Unable to ${isLike ? 'like' : 'dislike'} post` });
-              }
-              response.json({ message: `Post ${isLike ? 'liked' : 'disliked'}` });
+          if (existingReaction) {
+            // Convert database value as 0 or 1 for comparison
+            const existingIsLike = existingReaction.is_like === 1 ? true : false;
+            if (existingIsLike === isLike) {
+              database.run(
+                `DELETE FROM likes WHERE user_id = ? AND post_id = ?`,
+                [currentUserId, targetPostId],
+                (error) => {
+                  if (error) {
+                    return response.status(500).json({ error: 'Unable to remove reaction' });
+                  }
+                  response.json({ message: `Reaction ${isLike ? 'like' : 'dislike'} removed` });
+                }
+              );
+            } else {
+              database.run(
+                `UPDATE likes SET is_like = ? WHERE user_id = ? AND post_id = ?`,
+                [isLike ? 1 : 0, currentUserId, targetPostId],
+                (error) => {
+                  if (error) {
+                    console.error('Error updating reaction:', error);
+                    return response.status(500).json({ error: 'Unable to update reaction' });
+                  }
+                  response.json({ message: `Post ${isLike ? 'liked' : 'disliked'}` });
+                }
+              );
             }
-          );
+          } else {
+            database.run(
+              `INSERT INTO likes (user_id, post_id, is_like) VALUES (?, ?, ?)`,
+              [currentUserId, targetPostId, isLike ? 1 : 0],
+              (error) => {
+                if (error) {
+                  console.error('Error adding reaction:', error);
+                  return response.status(500).json({ error: `Unable to ${isLike ? 'like' : 'dislike'} post` });
+                }
+                response.json({ message: `Post ${isLike ? 'liked' : 'disliked'}` });
+              }
+            );
+          }
         }
       );
     }
@@ -200,6 +233,28 @@ router.get('/:postId/reactions', (request, response) => {
         }
       });
       response.json(totals);
+    }
+  );
+});
+
+// Added endpoint for user reaction
+router.get('/:postId/user-reaction', checkAuth, (request, response) => {
+  const postId = parseInt(request.params.postId);
+  const userId = request.loggedInUser.userId;
+
+  database.get(
+    `SELECT is_like FROM likes WHERE post_id = ? AND user_id = ?`,
+    [postId, userId],
+    (error, row) => {
+      if (error) {
+        return response.status(500).json({ error: 'Database error' });
+      }
+      if (row) {
+        const reaction = row.is_like === 1 ? 'like' : 'dislike';
+        response.json({ reaction });
+      } else {
+        response.json({ reaction: null });
+      }
     }
   );
 });
