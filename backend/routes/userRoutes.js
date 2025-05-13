@@ -71,32 +71,49 @@ router.post('/follow/:targetId', checkAuth, (request, response) => {
 
 router.get('/profile/:userId', (request, response) => {
   const profileUserId = request.params.userId;
-  database.all(
-    `SELECT * FROM follows WHERE followed_id = ?`,
+
+  database.get(
+    `SELECT username, email FROM users WHERE id = ?`,
     [profileUserId],
-    (error, followerList) => {
+    (error, user) => {
       if (error) {
-        return response.status(500).json({ error: 'Unable to fetch followers' });
+        return response.status(500).json({ error: 'Unable to fetch user details', details: error.message });
       }
+      if (!user) {
+        return response.status(404).json({ error: 'User not found' });
+      }
+
+      
       database.all(
-        `SELECT * FROM follows WHERE follower_id = ?`,
+        `SELECT * FROM follows WHERE followed_id = ?`,
         [profileUserId],
-        (error, followingList) => {
+        (error, followerList) => {
           if (error) {
-            return response.status(500).json({ error: 'Unable to fetch followings' });
+            return response.status(500).json({ error: 'Unable to fetch followers' });
           }
           database.all(
-            `SELECT bp.*, u.username FROM blog_posts bp JOIN users u ON bp.user_id = u.id WHERE bp.user_id IN (SELECT followed_id FROM follows WHERE follower_id = ?)`,
+            `SELECT * FROM follows WHERE follower_id = ?`,
             [profileUserId],
-            (error, followedPosts) => {
+            (error, followingList) => {
               if (error) {
-                return response.status(500).json({ error: 'Unable to fetch followed posts' });
-              }
-              response.json({
-                followers: followerList,
-                followings: followingList,
-                followedFeed: followedPosts
-              });
+                return response.status(500).json({ error: 'Unable to fetch followings' });
+              }      
+              database.all(
+                `SELECT bp.*, u.username FROM blog_posts bp JOIN users u ON bp.user_id = u.id WHERE bp.user_id IN (SELECT followed_id FROM follows WHERE follower_id = ?)`,
+                [profileUserId],
+                (error, followedPosts) => {
+                  if (error) {
+                    return response.status(500).json({ error: 'Unable to fetch followed posts' });
+                  }                
+                  response.json({
+                    username: user.username,
+                    email: user.email,
+                    followers: followerList,
+                    followings: followingList,
+                    followedFeed: followedPosts
+                  });
+                }
+              );
             }
           );
         }
