@@ -18,7 +18,9 @@ router.post('/register', async (request, response) => {
       if (error) {
         return response.status(400).json({ error: 'Email already registered' });
       }
-      response.status(201).json({ message: 'Account created' });
+      const userData = { userId: this.lastID, email: userEmail };
+      const authToken = jwt.sign(userData, jwtSecret, { expiresIn: '24h' });
+      response.status(201).json({ authToken });
     }
   );
 });
@@ -32,7 +34,7 @@ router.post('/login', (request, response) => {
       if (!userRecord || !(await bcrypt.compare(userPassword, userRecord.password))) {
         return response.status(401).json({ error: 'Invalid credentials' });
       }
-      const authToken = jwt.sign({ userId: userRecord.id }, jwtSecret, { expiresIn: '24h' }); 
+      const authToken = jwt.sign({ userId: userRecord.id }, jwtSecret, { expiresIn: '24h' });
       response.json({ authToken });
     }
   );
