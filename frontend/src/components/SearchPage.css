@@ -1,0 +1,42 @@
+.search-page-container {
+  padding: 2rem 0;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  color: #14171A;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.search-bar-section {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-pagination {
+  background: linear-gradient(45deg, #E1E8ED, #D1D9E6); 
+  border: none;
+  border-radius: 15px;
+  color: #14171A;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn-pagination:hover {
+  background: linear-gradient(45deg, #D1D9E6, #E1E8ED);
+  transform: scale(1.05);
+}
+
+.btn-pagination.active {
+  background: linear-gradient(45deg, #1DA1F2, #17a2b8);
+  color: white;
+}
