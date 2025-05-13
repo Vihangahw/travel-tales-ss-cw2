@@ -1,0 +1,47 @@
+.welcome-container {
+  padding: 2rem 0;
+}
+
+.welcome {
+  background: linear-gradient(135deg, #F5F8FA, #E1E8ED); 
+  border: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.welcome:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.welcome-title {
+  font-size: 2.5rem;
+  color: #1DA1F2;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  transition: color 0.3s ease;
+}
+
+.welcome-title:hover {
+  color: #FF6F61;
+}
+
+.welcome-text {
+  font-size: 1.1rem;
+  color: #14171A; 
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  color: #14171A;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-form-section {
+  max-width: 400px;
+  margin: 0 auto 2rem; 
+}
+
