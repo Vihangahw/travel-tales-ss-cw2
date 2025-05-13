@@ -1,0 +1,76 @@
+.new-post-container {
+  padding: 2rem 0;
+}
+
+.new-post {
+  background: white;
+  border: none;
+  border-radius: 15px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, max-height 0.3s ease, opacity 0.3s ease;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.new-post.expanded {
+  max-height: 500px; 
+  opacity: 1;
+}
+
+.new-post:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-title {
+  font-size: 1.8rem;
+  color: #14171A; 
+  font-weight: 700;
+}
+
+.new-post-input {
+  border-radius: 10px;
+  border: 1px solid #E1E8ED;
+  padding: 0.75rem;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.new-post-input:focus {
+  border-color: #1DA1F2; 
+  box-shadow: 0 0 5px rgba(29, 161, 242, 0.3);
+  outline: none;
+}
+
+.btn-create-post, .btn-create {
+  border: none;
+  border-radius: 20px;
+  font-weight: 600;
+  padding: 0.75rem;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn-create-post {
+  background: linear-gradient(45deg, #FF6F61, #FF8A65); 
+  color: white;
+  display: block;
+  margin: 0 auto;
+}
+
+.btn-create-post:hover {
+  background: linear-gradient(45deg, #FF8A65, #FF6F61);
+  transform: scale(1.05);
+}
+
+.btn-create {
+  background: linear-gradient(45deg, #FF6F61, #FF8A65); 
+  color: white;
+}
+
+.btn-create:hover {
+  background: linear-gradient(45deg, #FF8A65, #FF6F61);
+  transform: scale(1.05);
+}

@@ -1,0 +1,47 @@
+.post-interaction {
+  gap: 0.5rem;
+}
+
+.reaction-counts {
+  font-size: 0.9rem;
+  color: #657786;
+}
+
+.btn-like, .btn-dislike, .btn-follow {
+  border: none;
+  border-radius: 15px;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  transition: background 0.3s ease, transform 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.btn-like {
+  background: linear-gradient(45deg, #28a745, #34c759); 
+  color: white;
+}
+
+.btn-like:hover, .btn-liked {
+  background: linear-gradient(45deg, #218838, #28a745);
+  transform: scale(1.05);
+}
+
+.btn-dislike {
+  background: linear-gradient(45deg, #dc3545, #ff4d4f);
+  color: white;
+}
+
+.btn-dislike:hover, .btn-disliked {
+  background: linear-gradient(45deg, #c82333, #dc3545);
+  transform: scale(1.05);
+}
+
+.btn-follow {
+  background: linear-gradient(45deg, #1DA1F2, #17a2b8);
+  color: white;
+}
+
+.btn-follow:hover, .btn-following {
+  background: linear-gradient(45deg, #17a2b8, #1DA1F2);
+  transform: scale(1.05);
+}
