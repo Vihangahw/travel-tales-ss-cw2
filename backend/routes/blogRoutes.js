@@ -39,17 +39,22 @@ router.post('/create', checkAuth, (request, response) => {
 
 router.get('/all', (request, response) => {
   const { sortBy } = request.query;
-  let queryString = `SELECT * FROM blog_posts`;
+  let queryString = `
+    SELECT bp.*, u.username 
+    FROM blog_posts bp 
+    JOIN users u ON bp.user_id = u.id
+  `;
   
   if (sortBy === 'newest') {
-    queryString += ` ORDER BY created_at DESC`;
+    queryString += ` ORDER BY bp.created_at DESC`;
   } else if (sortBy === 'most-liked') {
     queryString = `
-      SELECT bp.*, COUNT(l.post_id) as like_count 
+      SELECT bp.*, u.username, COUNT(l.post_id) as like_count 
       FROM blog_posts bp 
+      JOIN users u ON bp.user_id = u.id
       LEFT JOIN likes l ON bp.id = l.post_id AND l.is_like = true 
       GROUP BY bp.id 
-      ORDER BY like_count DESC, created_at DESC
+      ORDER BY like_count DESC, bp.created_at DESC
     `;
   } else if (sortBy) {
     return response.status(400).json({ error: 'Invalid sort option. Use "newest" or "most-liked".' });
