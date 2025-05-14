@@ -1,70 +1,97 @@
 .post-list-container {
-  padding: 1rem 0;
+  padding: 20px;
 }
 
 .section-title {
-  font-size: 1.8rem;
-  color: #14171A; 
-  font-weight: 600;
+  font-size: 24px;
+  color: #333;
+  font-weight: bold;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 20px;
 }
 
 .post-card {
   background: white;
-  border: none;
-  border-radius: 15px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  max-height: 200px;
+  overflow: hidden;
+  margin-bottom: 20px;
 }
 
-.post-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+.post-card.expanded {
+  max-height: 600px;
 }
 
 .post-title {
-  font-size: 1.5rem;
-  color: #1DA1F2;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
+  font-size: 20px;
+  color: #007bff;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
 .post-content {
-  font-size: 1rem;
-  color: #14171A;
-  line-height: 1.5;
-  margin-bottom: 0.75rem;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 10px;
 }
 
 .post-meta {
-  font-size: 0.9rem;
-  color: #657786;
-  margin-bottom: 0.5rem;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.post-author {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.post-author strong {
+  color: #333;
+  font-weight: bold;
+}
+
+.btn-read-more {
+  background: #007bff;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  padding: 8px 16px;
+  margin-top: 10px;
+}
+
+.btn-info {
+  background: #17a2b8;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  padding: 8px 16px;
 }
 
 .btn-edit, .btn-delete {
   border: none;
-  border-radius: 15px;
+  border-radius: 10px;
   color: white;
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  transition: background 0.3s ease, transform 0.2s ease;
+  font-weight: bold;
+  padding: 8px 16px;
+  margin-top: 10px;
 }
 
 .btn-edit {
-  background: linear-gradient(45deg, #1DA1F2, #17a2b8); 
-}
-
-.btn-edit:hover {
-  background: linear-gradient(45deg, #17a2b8, #1DA1F2);
-  transform: scale(1.05);
+  background: #007bff;
+  margin-right: 10px;
 }
 
 .btn-delete {
-  background: linear-gradient(45deg, #dc3545, #c82333);
+  background: #dc3545;
 }
 
-.btn-delete:hover {
-  background: linear-gradient(45deg, #c82333, #dc3545);
-  transform: scale(1.05);
+.country-info {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  background: #f8f9fa;
 }

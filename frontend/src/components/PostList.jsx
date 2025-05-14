@@ -1,12 +1,38 @@
 import { useState } from 'react';
+import axios from 'axios';
 import PostInteraction from './PostInteraction';
 import './PostList.css';
 
 function PostList({ posts, loggedInUserId, onEdit, onDelete, reactions, onLike, onDislike, onFollow, followedUsers, likedPosts, dislikedPosts, showTitle = true }) {
   const [expandedPostId, setExpandedPostId] = useState(null);
+  const [countryInfo, setCountryInfo] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const handleToggleExpand = (postId) => {
     setExpandedPostId(expandedPostId === postId ? null : postId);
+  };
+
+  const handleViewCountryInfo = (countryName) => {
+    if (countryName === selectedCountry) {
+      setCountryInfo(null);
+      setSelectedCountry(null);
+      setErrorMessage(null);
+    } else {
+      axios.get(`http://localhost:4000/api/country/${countryName}`)
+        .then(response => {
+          console.log('Country Info Response:', response.data);
+          setCountryInfo(response.data);
+          setSelectedCountry(countryName);
+          setErrorMessage(null);
+        })
+        .catch(error => {
+          console.error('Error fetching country info:', error);
+          setErrorMessage('Failed to fetch country info');
+          setCountryInfo(null);
+          setSelectedCountry(null);
+        });
+    }
   };
 
   return (
@@ -29,6 +55,25 @@ function PostList({ posts, loggedInUserId, onEdit, onDelete, reactions, onLike, 
                   <>
                     <p className="card-text post-meta text-muted small">Country: {post.country_name}</p>
                     <p className="card-text post-meta text-muted small">Visit Date: {post.visit_date}</p>
+                    {errorMessage && selectedCountry === post.country_name && (
+                      <div className="alert alert-danger" role="alert">
+                        {errorMessage}
+                      </div>
+                    )}
+                    <button
+                      onClick={() => handleViewCountryInfo(post.country_name)}
+                      className="btn btn-info mt-2 mb-2"
+                    >
+                      {selectedCountry === post.country_name && countryInfo ? 'Hide Country Info' : 'View Country Info'}
+                    </button>
+                    {selectedCountry === post.country_name && countryInfo && (
+                      <div className="country-info mb-3">
+                        <img src={countryInfo.flag} alt={`${countryInfo.name} flag`} style={{ width: '100px', height: 'auto', marginBottom: '10px' }} />
+                        <p><strong>Currency:</strong> {countryInfo.currency}</p>
+                        <p><strong>Capital:</strong> {countryInfo.capital}</p>
+                        <p><strong>Languages:</strong> {countryInfo.languages}</p> {/* Add languages */}
+                      </div>
+                    )}
                     <PostInteraction
                       postId={post.id}
                       userId={post.user_id}
