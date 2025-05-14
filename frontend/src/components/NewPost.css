@@ -74,3 +74,45 @@
   background: linear-gradient(45deg, #FF8A65, #FF6F61);
   transform: scale(1.05);
 }
+
+.country-input-container {
+  position: relative;
+}
+
+.country-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #E1E8ED; 
+  border-radius: 10px;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 1000;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.country-suggestion-item {
+  padding: 0.5rem 0.75rem; 
+  cursor: pointer;
+}
+
+.country-suggestion-item:hover {
+  background: #E1E8ED; 
+}
+
+.no-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #E1E8ED;
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+  color: #6c757d;
+  z-index: 1000;
+}
