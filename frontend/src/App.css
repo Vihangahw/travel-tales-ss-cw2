@@ -1,42 +1,81 @@
-/* #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+:root {
+  --primary: #1DA1F2; 
+  --secondary: #F5F8FA; 
+  --accent: #FF6F61; 
+  --text-dark: #14171A;
+  --text-muted: #657786;
+}
+
+.app {
+  min-height: 100vh;
+  background-color: var(--secondary);
+}
+
+.app-header {
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 0;
+}
+
+.app-title {
+  font-size: 2rem;
+  color: var(--primary);
   text-align: center;
+  padding: 1rem 0;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.app-main {
+  padding: 2rem 0;
+  background-color: var(--secondary);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.welcome-section {
+  margin-bottom: 2rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.auth-section {
+  margin-top: 2rem;
 }
 
-.card {
-  padding: 2em;
+.main-content {
+  padding: 1rem 0;
 }
 
-.read-the-docs {
-  color: #888;
-} */
+.new-post-section, .update-post-section, .search-section, .sort-section, .post-list-section {
+  margin-bottom: 2rem;
+}
+
+.btn-profile, .btn-back {
+  border: none;
+  border-radius: 15px;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn-profile {
+  background: linear-gradient(45deg, #1DA1F2, #17a2b8); 
+  color: white;
+}
+
+.btn-profile:hover {
+  background: linear-gradient(45deg, #17a2b8, #1DA1F2);
+  transform: scale(1.05);
+}
+
+.btn-back {
+  background: linear-gradient(45deg, #E1E8ED, #D1D9E6);
+  color: #14171A;
+}
+
+.btn-back:hover {
+  background: linear-gradient(45deg, #D1D9E6, #E1E8ED);
+  transform: scale(1.05);
+}

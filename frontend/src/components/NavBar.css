@@ -1,0 +1,50 @@
+
+.navbar-dark .navbar-brand,
+.navbar-dark .nav-link {
+  color: white !important;
+  transition: color 0.3s ease;
+}
+
+.navbar-dark .navbar-brand:hover,
+.navbar-dark .nav-link:hover {
+  color: #1DA1F2 !important; 
+}
+
+.navbar-dark .bg-dark {
+  background: linear-gradient(90deg, #14171A, #1c2526) !important;
+}
+
+.btn-login, .btn-register, .btn-logout {
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+
+.btn-login {
+  background: linear-gradient(45deg, #FF6F61, #FF8A65);
+}
+
+.btn-login:hover {
+  background: linear-gradient(45deg, #FF8A65, #FF6F61);
+  transform: scale(1.05);
+}
+
+.btn-register {
+  background: linear-gradient(45deg, #FF6F61, #FF8A65);
+}
+
+.btn-register:hover {
+  background: linear-gradient(45deg, #FF8A65, #FF6F61);
+  transform: scale(1.05);
+}
+
+.btn-logout {
+  background: linear-gradient(45deg, #1DA1F2, #17a2b8);
+}
+
+.btn-logout:hover {
+  background: linear-gradient(45deg, #17a2b8, #1DA1F2);
+  transform: scale(1.05);
+}
